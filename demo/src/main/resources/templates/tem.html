@@ -1,0 +1,12 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<table>
+	<tr>
+		<td>姓名</td><td>性别</td><td>年龄</td>
+	</tr>
+	<tr th:each="prod:${userList}">
+		<td th:text="${prod.name}"></td><td th:text="${prod.sex}"></td><td th:text="${prod.age}"></td>
+	</tr>
+</table>
+</body>
+</html>

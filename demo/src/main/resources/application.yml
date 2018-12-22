@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    primary:
+      username: test
+      password: test
+      driver-class-name: oracle.jdbc.OracleDriver
+      jdbc-url: jdbc:oracle:thin:@127.0.0.1:1521:orcl
+      
+# Html模板thymeleaf配置
+thymeleaf:
+  cache: false
+  check-template-location: true
+  content-type: text/html
+  encoding: UTF-8
+  excluded-view-names: 
+  mode: HTML
+  prefix: classpath:/templates/
+  suffix: .html
+  template-resolver-order:

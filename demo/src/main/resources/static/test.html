@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="/script/element-ui/index.css">
+<script src="/script/jquery-2.1.0.js"></script>
+<script src="/script/vue.js"></script>
+<script src="/script/element-ui/index.js"></script>
+
+</head>
+<body>
+<div id="app"> 
+<div style="width:500px">
+<el-upload
+  class="upload-demo"
+  action="/upload/upload"
+  :on-preview="handlePreview"
+  :on-remove="handleRemove"
+  :before-remove="beforeRemove"
+  :on-success="onSuccess"
+  multiple
+  :limit="3"
+  :on-exceed="handleExceed"
+  :file-list="fileList"
+  >
+  <el-button size="small" type="primary">点击上传</el-button>
+</el-upload>
+</div>
+<br>
+<br>
+<div><el-button type="primary" @click="submit">提交</el-button></div>
+</div>
+<script>
+$(function(){
+	$.ajax({
+		url:'/upload/showFile',
+		type:'get',
+		dataType:'json',
+		success:function(data){
+			console.log(JSON.stringify(data.fileList));
+			vm.fileList=data.fileList;
+			
+		}
+	});
+});
+
+var vm=new Vue({
+	el:"#app",
+    data: {
+        fileList: []
+    },
+    methods: {
+      handleRemove(file, fileList) {
+        console.log(file, fileList);
+        this.fileList=fileList;
+      },
+      handlePreview(file) {
+    	  var hide_view = true;
+    	  var file_type = file.name.split(".")[1];
+    	  if(file_type != 'pdf' && file_type != 'jpg' && file_type != 'jpeg' && file_type != 'bmp' && file_type != 'png'){
+    		  hide_view = false;
+    	  }
+    	  this.$confirm('只能预览图片和pdf格式的文件', '提示', {
+              distinguishCancelAndClose: true,//区分关闭和取消
+              showCancelButton : hide_view,//是否隐藏取消按钮
+              confirmButtonText: '下载',
+              cancelButtonText: '预览',
+              type: 'info',
+              center: true
+            }).then(()=>{
+            	window.open('/upload/viewFile?fileName='+file.name+'&path='+file.response.realUrl+"&flag=download" ,'_blank');
+            }).catch(action=>{
+            	if(action==='cancel'){
+            		window.open('/upload/viewFile?fileName='+file.name+'&path='+file.response.realUrl+"&flag=view" ,'_blank');
+            	}
+            });
+      },
+      handleExceed(files, fileList) {
+        this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+      },
+      beforeRemove(file, fileList) {
+        return this.$confirm(`确定移除 ${ file.name }？`);
+      },
+      onSuccess(response, file, fileList)	{
+    	  console.log(JSON.stringify(fileList));
+    	  console.log(response.realUrl);
+    	  console.log(window.URL.createObjectURL(file.raw));
+    	  console.log(JSON.stringify(file.raw));
+    	  this.fileList=fileList;
+      },
+      submit(){
+    	  if(this.fileList.length==0){
+    		  vm.$message({
+		          message: "请选择文件",
+		          type: 'error'
+		        });
+    		  return;
+    	  }
+    	  console.log(JSON.stringify(this.fileList));
+    	  $.ajax({
+    		  url:"/upload/saveFile",
+    		  type:'post',
+    		  data:{fileList:JSON.stringify(vm.fileList)},
+    		  success:function(data){
+    			  vm.$message({
+    		          message: data,
+    		          type: 'success'
+    		        });
+    		  }
+    	  });
+      }
+    }
+});
+
+
+</script>
+</body>
+</html>
